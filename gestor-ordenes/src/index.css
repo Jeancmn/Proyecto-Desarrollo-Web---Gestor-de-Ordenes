@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.guardar{
+    /*bg-green-600 mt-5 p-2 text-center text-white*/
+    background-color: rgb(74, 236, 87);
+    margin-top: 15px;
+    padding: 7px;
+    text-align: center;
+    color: #ffff;
+    font-weight: bold;
+    border-radius: 4px;
+
+}
