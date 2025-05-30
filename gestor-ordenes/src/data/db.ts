@@ -105,8 +105,13 @@ export const tipOptions = [
       label: '20%'
   },
   {
-      id: 'tip-50',
-      value: .50,
-      label: '50%'
+      id: 'tip-40',
+      value: .40,
+      label: '40%'
   },
+  {
+      id: 'Ninguna',
+      value: .0,
+      label: 'Ninguna'
+  }
 ]

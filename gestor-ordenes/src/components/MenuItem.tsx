@@ -12,7 +12,7 @@ export default function MenuItems({ item, dispatch }: MenuProps) {
     return (
         <>
             <button
-                className="border-2 bg-purple-400 hover:bg-gray-300  w-full p-3 flex justify-between"
+                className="border-2 bg-yellow-400 hover:bg-gray-300  w-full p-3 flex justify-between"
                 onClick={() => dispatch({ type: 'add-order', payload: { item } })}            
             >
                 <p>{item.name}</p>

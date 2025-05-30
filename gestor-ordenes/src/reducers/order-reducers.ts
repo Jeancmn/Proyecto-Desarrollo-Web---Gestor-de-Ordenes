@@ -4,7 +4,8 @@ export type OrderActions =
     { type: 'add-order', payload: { item: MenuItemType } } |
     { type: 'remove-item', payload: { id: OrderItem['id'] } } |
     { type: 'set-tip', payload: { tip: number } } |
-    { type: 'save-order' }
+    { type: 'save-order' } |
+    { type: 'clear-saved-orders' }
 
 
 export type OrderState = {
@@ -65,6 +66,8 @@ export const orderReducer = (state: OrderState = initialState, action: OrderActi
     }
 
     if (action.type === 'save-order') {
+        if (state.orders.length === 0) return state;
+        
         const div = document.getElementById(state.divId)
         const msg = document.createElement('p')
 
@@ -75,6 +78,41 @@ export const orderReducer = (state: OrderState = initialState, action: OrderActi
 
         setTimeout(() => msg.remove(), 2000)
 
+        // --- NUEVO: Guardar en localStorage ---
+        const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+        
+        // Calcular el número basado en el último número existente
+        const newOrderNumber = savedOrders.length > 0 ? 
+            Math.max(...savedOrders.map((order: any) => order.number || 0)) + 1 : 1;
+        
+        const newOrder = {
+            number: newOrderNumber,
+            date: new Date().toISOString(),
+            orders: state.orders,
+            tip: state.tip,
+            total: state.orders.reduce((total, item) => total + (item.price * item.quantity), 0) * (1 + state.tip)
+        };
+
+        // NUEVO: Verificar si esta orden ya existe (mismo contenido y hora similar)
+        const currentTime = new Date().getTime();
+        const isDuplicate = savedOrders.some((order: any) => {
+            const orderTime = new Date(order.date).getTime();
+            const timeDiff = Math.abs(currentTime - orderTime);
+            // Si la diferencia es menor a 1 segundo Y tiene el mismo contenido
+            return timeDiff < 1000 && 
+                    JSON.stringify(order.orders) === JSON.stringify(state.orders) &&
+                    order.tip === state.tip;
+        });
+
+        // Solo guardar si no es duplicado
+        if (!isDuplicate) {
+            savedOrders.push(newOrder);
+            localStorage.setItem('orders', JSON.stringify(savedOrders));
+            // Disparar evento personalizado para actualizar la UI
+            window.dispatchEvent(new CustomEvent('ordersUpdated'));
+        }
+        // --- FIN NUEVO ---
+
         return {
             ...state,
             orders: [],
@@ -82,5 +120,9 @@ export const orderReducer = (state: OrderState = initialState, action: OrderActi
         }
     }
 
+    if (action.type === 'clear-saved-orders') {
+    localStorage.removeItem('orders');
+    return state;
+}
     return state
 }
