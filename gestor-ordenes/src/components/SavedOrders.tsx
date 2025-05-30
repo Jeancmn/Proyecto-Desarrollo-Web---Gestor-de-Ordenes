@@ -17,18 +17,14 @@ export default function SavedOrders() {
   };
 
   useEffect(() => {
-    // Cargar órdenes al inicio
     loadOrders();
 
-    // Escuchar eventos personalizados para cambios internos (ESTE ES EL IMPORTANTE)
     const handleOrdersUpdate = () => {
       loadOrders();
     };
 
-    // Agregar listener para el evento personalizado
     window.addEventListener('ordersUpdated', handleOrdersUpdate);
 
-    // Cleanup
     return () => {
       window.removeEventListener('ordersUpdated', handleOrdersUpdate);
     };
@@ -37,7 +33,6 @@ export default function SavedOrders() {
   const handleClearOrders = () => {
     localStorage.removeItem("orders");
     setOrders([]);
-    // Disparar evento personalizado
     window.dispatchEvent(new CustomEvent('ordersUpdated'));
   };
 
@@ -54,7 +49,9 @@ export default function SavedOrders() {
       {orders.length === 0 && <p className="text-black">No hay órdenes guardadas.</p>}
       {orders.map(order => (
         <div key={order.number} className="mb-6 border-b border-slate-400 pb-4">
-          <p className="text-black font-bold">Orden {order.number} - {new Date(order.date).toLocaleString()}</p>
+          <p className="text-black font-bold">
+            Orden {order.number} - {new Date(order.date).toLocaleString()}
+          </p>
           <ul className="ml-4 text-black">
             {order.orders.map((item, idx) => (
               <li key={idx}>

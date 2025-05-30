@@ -1,12 +1,24 @@
-import { useReducer } from "react"
+import { useReducer, useEffect } from "react"
 import MenuItems from "./components/MenuItem"
 import OrderItems from "./components/OrderItems"
 import { initialState, orderReducer } from "./reducers/order-reducers"
 
-
 function App() {
-
   const [state, dispatch] = useReducer(orderReducer, initialState)
+
+  useEffect(() => {
+    // Cargar datos del menú desde archivo local
+    const loadMenu = async () => {
+      try {
+        const { menuItems } = await import('./data/db');
+        dispatch({ type: 'load-menu', payload: { items: menuItems } });
+      } catch (error) {
+        console.error('Error cargando menú:', error);
+      }
+    };
+
+    loadMenu();
+  }, []);
 
   return (
     <>
@@ -26,7 +38,6 @@ function App() {
               />
             )}
           </div>
-
         </div>
 
         <div className="border border-dashed border-slate-500 p-5 rounded-lg space-y-10">
@@ -40,13 +51,8 @@ function App() {
             <p className="text-center text-white">La orden está vacia</p>
           }
           <div id={state.divId}></div>
-
         </div>
-
       </main>
-
-
-
     </>
   )
 }

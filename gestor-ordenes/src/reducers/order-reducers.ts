@@ -1,28 +1,38 @@
 import { MenuItemType, OrderItem } from "../types";
-import { menuItems } from "../data/db";
+
 export type OrderActions =
     { type: 'add-order', payload: { item: MenuItemType } } |
     { type: 'remove-item', payload: { id: OrderItem['id'] } } |
     { type: 'set-tip', payload: { tip: number } } |
     { type: 'save-order' } |
-    { type: 'clear-saved-orders' }
-
+    { type: 'clear-saved-orders' } |
+    { type: 'load-menu', payload: { items: MenuItemType[] } }
 
 export type OrderState = {
     data: MenuItemType[]
     orders: OrderItem[]
     tip: number
     divId: string
+    loading?: boolean
 }
 
 export const initialState: OrderState = {
-    data: menuItems,
+    data: [],
     orders: [],
     tip: 0,
-    divId: 'parent'
+    divId: 'parent',
+    loading: false
 }
 
 export const orderReducer = (state: OrderState = initialState, action: OrderActions): OrderState => {
+
+    if (action.type === 'load-menu') {
+        return {
+            ...state,
+            data: action.payload.items,
+            loading: false
+        }
+    }
 
     if (action.type === 'add-order') {
         const itemExist = state.orders.find(searchOrder => searchOrder.id === action.payload.item.id)
@@ -78,19 +88,25 @@ export const orderReducer = (state: OrderState = initialState, action: OrderActi
 
         setTimeout(() => msg.remove(), 2000)
 
-        // --- NUEVO: Guardar en localStorage ---
+        // Guardar en localStorage
         const savedOrders = JSON.parse(localStorage.getItem('orders') || '[]');
         
         // Calcular el número basado en el último número existente
-        const newOrderNumber = savedOrders.length > 0 ? 
-            Math.max(...savedOrders.map((order: any) => order.number || 0)) + 1 : 1;
+        let newOrderNumber = 1;
+        if (savedOrders.length > 0) {
+            const numbers = savedOrders.map((order: any) => order.number || 0);
+            newOrderNumber = Math.max(...numbers) + 1;
+        }
+        
+        const subtotal = state.orders.reduce((total, item) => total + (item.price * item.quantity), 0);
+        const total = subtotal * (1 + state.tip);
         
         const newOrder = {
             number: newOrderNumber,
             date: new Date().toISOString(),
             orders: state.orders,
             tip: state.tip,
-            total: state.orders.reduce((total, item) => total + (item.price * item.quantity), 0) * (1 + state.tip)
+            total: total
         };
 
         // NUEVO: Verificar si esta orden ya existe (mismo contenido y hora similar)
@@ -100,18 +116,16 @@ export const orderReducer = (state: OrderState = initialState, action: OrderActi
             const timeDiff = Math.abs(currentTime - orderTime);
             // Si la diferencia es menor a 1 segundo Y tiene el mismo contenido
             return timeDiff < 1000 && 
-                    JSON.stringify(order.orders) === JSON.stringify(state.orders) &&
-                    order.tip === state.tip;
+                   JSON.stringify(order.orders) === JSON.stringify(state.orders) &&
+                   order.tip === state.tip;
         });
 
         // Solo guardar si no es duplicado
         if (!isDuplicate) {
             savedOrders.push(newOrder);
             localStorage.setItem('orders', JSON.stringify(savedOrders));
-            // Disparar evento personalizado para actualizar la UI
             window.dispatchEvent(new CustomEvent('ordersUpdated'));
         }
-        // --- FIN NUEVO ---
 
         return {
             ...state,
@@ -121,8 +135,10 @@ export const orderReducer = (state: OrderState = initialState, action: OrderActi
     }
 
     if (action.type === 'clear-saved-orders') {
-    localStorage.removeItem('orders');
-    return state;
-}
+        localStorage.removeItem('orders');
+        window.dispatchEvent(new CustomEvent('ordersUpdated'));
+        return state;
+    }
+
     return state
 }
