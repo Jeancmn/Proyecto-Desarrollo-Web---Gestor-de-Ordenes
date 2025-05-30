@@ -308,11 +308,7 @@ Las contribuciones son bienvenidas. Para cambios importantes:
 
 Este proyecto está bajo la Licencia MIT. Ve el archivo `LICENSE` para más detalles.
 
-## 🔗 Links
 
-- **Frontend Demo**: [https://tu-frontend.vercel.app](https://tu-frontend.vercel.app)
-- **Backend API**: [https://tu-backend.railway.app](https://tu-backend.railway.app)
-- **API Docs**: [https://tu-backend.railway.app/health](https://tu-backend.railway.app/health)
 
 ## 👨‍💻 Autor
 
