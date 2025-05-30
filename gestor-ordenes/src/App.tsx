@@ -16,7 +16,7 @@ function App() {
 
       <main className="max-w-7xl mx-auto py-20 grid md:grid-cols-2">
         <div className="p-5 border border-dashed border-slate-500 rounded-lg space-y-10">
-          <h2 className="text-4xl font-black text-white">Menu</h2>
+          <h2 className="text-4xl font-black text-white">Menú</h2>
           <div className="space-y-3 mt-10">
             {state.data.map(item =>
               <MenuItems
